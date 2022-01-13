@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Shift</title>
+
+    <!-- Disable tap highlight on IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <!-- Web Application Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Red Shift">
+    <link rel="icon" sizes="192x192" href="/chrome-touch-icon-192x192.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Red Shift">
+    <link rel="apple-touch-icon" href="apple-touch-icon-152x152.png">
+
+    <!-- Tile icon for Win8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="/ms-touch-144x144.png">
+    <meta name="msapplication-TileColor" content="#2F3BA2">
+
+    <!-- Color the status bar on mobile devices -->
+    <meta name="theme-color" content="#2F3BA2">
+
+   
+  </head>
+<body  style="position: fixed; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
+color:darkred; background:black;
+font-size: xx-large;" onmousedown="return false" onselectstart="return false" ontouchstart="return false">
+    <h2 style="text-align:center">
+        RED SHIFT </h2>
+    <p style="text-align: center;">
+        X: <span id="x_coordinate"> </span>
+        Y: <span id="y_coordinate"> </span>
+    </p>
+    <canvas id="canvas" name="game"></canvas>
+    <script>
+		var mcu_address = window.location.hostname;
+		var connection;
+		
+		function startWebsocket() {
+			connection = new WebSocket('ws://' + mcu_address + '/ws', ['ws']);
+			
+			connection.onopen = function () {
+				connection.send('Connect ' + new Date());
+			};
+			connection.onerror = function (error) {
+				mcu_address = prompt("Please enter your telecope's ip address", mcu_address);
+				connection = null;
+				setTimeout(startWebsocket, 5000);
+			};
+			connection.onmessage = function (e) {
+				console.log('Server: ', e.data);
+			};
+			connection.onclose = function() {
+				connection = new WebSocket('ws://' + mcu_address + '/ws', ['ws']);
+			}
+		}
+		startWebsocket();
+
+        function send(x,y){
+			if(connection.readyState == 1) {
+				connection.send("xy" + x + ":" + y);
+			}
+        }
+
+
+    </script>
+    <script>
+		const delayTime = 100;
+		const time = new Date();
+		var timeOfLastRun = time.getTime();
+		
+        var canvas, ctx;
+
+        window.addEventListener('load', () => {
+
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');          
+            resize(); 
+
+            document.addEventListener('mousedown', startDrawing);
+            document.addEventListener('mouseup', stopDrawing);
+            document.addEventListener('mousemove', Draw);
+
+            document.addEventListener('touchstart', startDrawing);
+            document.addEventListener('touchend', stopDrawing);
+            document.addEventListener('touchcancel', stopDrawing);
+            document.addEventListener('touchmove', Draw);
+            window.addEventListener('resize', resize);
+
+            document.getElementById("x_coordinate").innerText = 0;
+            document.getElementById("y_coordinate").innerText = 0;
+        });
+
+        var width, height, radius, x_orig, y_orig;
+        function resize() {
+            width = window.innerWidth;
+			height = window.innerHeight
+            radius = height / 10;
+            height = radius * 6.5;
+            ctx.canvas.width = width;
+            ctx.canvas.height = height;
+            background();
+            joystick(width / 2, height / 3);
+        }
+
+        function background() {
+            x_orig = width / 2;
+            y_orig = height / 3;
+        }
+
+        function joystick(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+            ctx.fillStyle = 'darkred';
+            ctx.fill();
+        }
+
+        let coord = { x: 0, y: 0 };
+		let x0 = 0;
+		let y0 = 0;
+        let paint = false;
+
+        function getPosition(event) {
+            var mouse_x = event.clientX || event.touches[0].clientX;
+            var mouse_y = event.clientY || event.touches[0].clientY;
+            coord.x = mouse_x - canvas.offsetLeft;
+            coord.y = mouse_y - canvas.offsetTop;
+        }
+
+        function is_it_in_the_circle() {
+            var current_radius = Math.sqrt(Math.pow(coord.x - x_orig, 2) + Math.pow(coord.y - y_orig, 2));
+            if (radius >= current_radius) return true
+            else return false
+        }
+
+
+        function startDrawing(event) {
+            paint = true;
+            getPosition(event);
+			x0 = coord.x;
+			y0 = coord.y;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            background();
+            joystick(coord.x, coord.y);
+            Draw();
+        }
+
+
+        function stopDrawing() {
+            paint = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            background();
+            joystick(width / 2, height / 3);
+            document.getElementById("x_coordinate").innerText = 0;
+            document.getElementById("y_coordinate").innerText = 0;
+			send(0,0);
+        }
+
+        function Draw(event) {
+			
+            if (paint) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                background();
+                var angle_in_degrees,x, y, speed;
+                var angle = Math.atan2((coord.y - y0), (coord.x - x0));
+
+                if (Math.sign(angle) == -1) {
+                    angle_in_degrees = Math.round(-angle * 180 / Math.PI);
+                }
+                else {
+                    angle_in_degrees = Math.round( 360 - angle * 180 / Math.PI);
+                }
+
+                joystick(coord.x, coord.y);
+                x = coord.x;
+                y = coord.y;
+            
+                getPosition(event);
+
+                var x_relative = Math.round(x - x0);
+                var y_relative = Math.round(y - y0);
+                
+                document.getElementById("x_coordinate").innerText =  x_relative;
+                document.getElementById("y_coordinate").innerText = -y_relative ;
+				
+				const time = new Date();
+				if ( time.getTime() - timeOfLastRun < delayTime) {return;}
+				timeOfLastRun = time.getTime();
+
+                send( x_relative,-y_relative);
+            }
+        } 
+    </script>
+	<script src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+    <!-- build:js scripts/main.min.js -->
+    <script src="main.js"></script>
+    <!-- endbuild -->
+
+</body>
+</html><br>
