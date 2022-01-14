@@ -49,10 +49,9 @@
       digitalWrite(Pin3, HIGH); \
       break; \
     default: \
-      // Lock
       digitalWrite(Pin0, HIGH); \
       digitalWrite(Pin1, LOW); \
       digitalWrite(Pin2, LOW); \
       digitalWrite(Pin3, LOW); \
-    break; \
+      break; \
 }
