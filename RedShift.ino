@@ -30,6 +30,8 @@ void move_with_speed();
 void go_to_position();
 void track(); 
 void (*move_now)() = &track;
+
+void handleCommand(String);
 void set_position(int*, int);
 
 void setup()
@@ -106,46 +108,49 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       message = (char*)data;
       message = message.substring(0, len);
       Serial.println(message);
-      if (message.substring(0,2).equals("xy")) {
-        // If this is a new xy session, set timers and controll function
-        if ((x == 0) && (y == 0)) {
-          last_x_step_time = last_y_step_time = micros();
-          move_now = &move_with_speed;
-        }
-        // Parse xy position/speed
-        x_temp = message.substring(2, message.indexOf(":")).toInt();
-        y_temp = message.substring(message.indexOf(":") + 1).toInt();
-        if (x_temp > 0) {
-          x_dir = 1;
-          if (x_temp > 150) {x_temp = 150;}
-          x = x_temp;
-        } else {
-          x_dir = -1;
-          if (x_temp < -150) {x_temp = -150;}
-          x = -1 * x_temp;
-        }
-        if (y_temp > 0) {
-          y_dir = 1;
-          if (y_temp > 150) {y_temp = 150;}
-          y = y_temp;
-        } else {
-          y_dir = -1;
-          if (y_temp < -150) {y_temp = -150;}
-          y = -1 * y_temp;
-        }
-        
-        if ((x == 0) && (y == 0)) { // End of xy session
-          move_now = &track;
-        }
-      } else {
-        move_now = &track;
-      }
+      handleCommand(message);
       Serial.println(x);
       Serial.println(y);
       break;
     case WS_EVT_PONG:
     case WS_EVT_ERROR:
       break;
+  }
+}
+
+void handleCommand(String command){
+  if (command.substring(0,2).equals("xy")) {
+    // If this is a new xy session, set times and controll function
+    if ((x == 0) && (y == 0)) {
+      last_x_step_time = last_y_step_time = micros();
+      move_now = &move_with_speed;
+    }
+    // Parse xy position/speed
+    x_temp = command.substring(2, command.indexOf(":")).toInt();
+    y_temp = command.substring(command.indexOf(":") + 1).toInt();
+    if (x_temp > 0) {
+      x_dir = 1;
+      if (x_temp > 150) {x_temp = 150;}
+      x = x_temp;
+    } else {
+      x_dir = -1;
+      if (x_temp < -150) {x_temp = -150;}
+      x = -1 * x_temp;
+    }
+    if (y_temp > 0) {
+      y_dir = 1;
+      if (y_temp > 150) {y_temp = 150;}
+      y = y_temp;
+    } else {
+      y_dir = -1;
+      if (y_temp < -150) {y_temp = -150;}
+      y = -1 * y_temp;
+    }    
+    if ((x == 0) && (y == 0)) { // End of xy session
+      move_now = &track;
+    }
+  } else {
+    move_now = &track;
   }
 }
 
