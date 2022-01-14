@@ -188,9 +188,14 @@ font-size: xx-large;" onmousedown="return false" onselectstart="return false" on
             
                 getPosition(event);
 
-                var x_relative = Math.round(x - x0);
-                var y_relative = Math.round(y - y0);
-                
+                var x_relative = Math.round((x - x0) * 100 / height);
+                x_relative = Math.min(x_relative, 100);
+                x_relative = Math.max(x_relative, -100);
+
+                var y_relative = Math.round((y - y0) * 100 / height);
+                y_relative = Math.min(y_relative, 100);
+                y_relative = Math.max(y_relative, -100);
+
                 document.getElementById("x_coordinate").innerText =  x_relative;
                 document.getElementById("y_coordinate").innerText = -y_relative ;
 				

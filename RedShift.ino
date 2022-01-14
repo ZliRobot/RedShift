@@ -12,7 +12,10 @@ const char* password = "WIFI_PASSWORD";
 int elevation_pins[] = {16,5,4,0};
 int azimuth_pins[] = {14,12,13,15};
 
-int x,y, x_dir, y_dir, x_temp, y_temp;
+// Maximum number of stepper steps per second
+const int maximum_frequency = 1000;
+
+int x,y, x_dir, y_dir, x_temp, y_temp, x_period_us, y_period_us;
 unsigned long current_time;
 unsigned long last_x_step_time, last_y_step_time;
 int elevation_step, azimuth_step;
@@ -125,29 +128,19 @@ void handleCommand(String command){
       last_x_step_time = last_y_step_time = micros();
       move_now = &move_with_speed;
     }
-    // Parse xy position/speed
+    // Parse xy speed
     x_temp = command.substring(2, command.indexOf(":")).toInt();
     y_temp = command.substring(command.indexOf(":") + 1).toInt();
-    if (x_temp > 0) {
-      x_dir = 1;
-      if (x_temp > 150) {x_temp = 150;}
-      x = x_temp;
-    } else {
-      x_dir = -1;
-      if (x_temp < -150) {x_temp = -150;}
-      x = -1 * x_temp;
-    }
-    if (y_temp > 0) {
-      y_dir = 1;
-      if (y_temp > 150) {y_temp = 150;}
-      y = y_temp;
-    } else {
-      y_dir = -1;
-      if (y_temp < -150) {y_temp = -150;}
-      y = -1 * y_temp;
-    }    
+    x_dir = x_temp > 0 ? 1 : -1;
+    x = abs(x_temp);
+    y_dir = y_temp > 0 ? 1 : -1;
+    y = abs(y_temp);
+    
     if ((x == 0) && (y == 0)) { // End of xy session
       move_now = &track;
+    } else {  // Set stepping period
+      if (x > 0) {x_period_us = (100 / x) * (1000000 / maximum_frequency);}
+      if (y > 0) {y_period_us = (100 / y) * (1000000 / maximum_frequency);}
     }
   } else {
     move_now = &track;
@@ -156,13 +149,13 @@ void handleCommand(String command){
 
 void move_with_speed() {
   current_time = micros();
-  if ((x != 0) && (current_time > last_x_step_time + 150000 / x)) {
+  if ((x != 0) && (current_time > last_x_step_time + x_period_us)) {
     elevation_step += x_dir;
     if (elevation_step == 8) {elevation_step = 0;}
     if (elevation_step == -1){elevation_step = 7;}
     last_x_step_time = current_time;
   }
-  if ((y != 0) && (current_time > last_y_step_time + 150000 / y)) {
+  if ((y != 0) && (current_time > last_y_step_time + y_period_us)) {
     azimuth_step += y_dir;
     if (azimuth_step == 8) {azimuth_step = 0;}
     if (azimuth_step == -1){azimuth_step = 7;}
