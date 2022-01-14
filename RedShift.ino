@@ -9,8 +9,8 @@
 const char* ssid = "WIFI_SSID";
 const char* password = "WIFI_PASSWORD";
 
-#define ELEVATION_MOTOR 16,5,4,0
-#define AZIMUTH_MOTOR 14,12,13,15
+int elevation_pins[] = {16,5,4,0};
+int azimuth_pins[] = {14,12,13,15};
 
 int x,y, x_dir, y_dir, x_temp, y_temp;
 unsigned long current_time;
@@ -30,7 +30,7 @@ void move_with_speed();
 void go_to_position();
 void track(); 
 void (*move_now)() = &track;
-void set_position(int, int, int, int, int);
+void set_position(int*, int);
 
 void setup()
 {  
@@ -82,14 +82,10 @@ void setup()
   Serial.println(WiFi.localIP()); 
   Serial.print("\n");
 
-  pinMode(0, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(16, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
-  pinMode(14, OUTPUT);
-  pinMode(15, OUTPUT);
+  for (int i = 0; i < 4; i++){
+    pinMode(elevation_pins[i], OUTPUT);
+    pinMode(azimuth_pins[i], OUTPUT);
+  }
 }
 
 void loop(){
@@ -167,69 +163,69 @@ void move_with_speed() {
     if (azimuth_step == -1){azimuth_step = 7;}
     last_y_step_time = current_time;
   }
-  set_position(16,5,4,0, elevation_step);
-  set_position(14,12,13,15, azimuth_step);
+  set_position(elevation_pins, elevation_step);
+  set_position(azimuth_pins, azimuth_step);
 }
 
 void go_to_position() {}
 
 void track(){}
 
-void set_position(int Pin0, int Pin1, int Pin2, int Pin3, int Position){
+void set_position(int *pin, int Position){
   switch(Position){
     case 0:
-      digitalWrite(Pin0, LOW);
-      digitalWrite(Pin1, LOW);
-      digitalWrite(Pin2, LOW);
-      digitalWrite(Pin3, HIGH);
+      digitalWrite(pin[0], LOW);
+      digitalWrite(pin[1], LOW);
+      digitalWrite(pin[2], LOW);
+      digitalWrite(pin[3], HIGH);
       break;
     case 1:
-      digitalWrite(Pin0, LOW);
-      digitalWrite(Pin1, LOW);
-      digitalWrite(Pin2, HIGH); 
-      digitalWrite(Pin3, HIGH);
+      digitalWrite(pin[0], LOW);
+      digitalWrite(pin[1], LOW);
+      digitalWrite(pin[2], HIGH); 
+      digitalWrite(pin[3], HIGH);
       break;
     case 2:
-      digitalWrite(Pin0, LOW);
-      digitalWrite(Pin1, LOW);
-      digitalWrite(Pin2, HIGH);
-      digitalWrite(Pin3, LOW);
+      digitalWrite(pin[0], LOW);
+      digitalWrite(pin[1], LOW);
+      digitalWrite(pin[2], HIGH);
+      digitalWrite(pin[3], LOW);
       break;
     case 3:
-      digitalWrite(Pin0, LOW);
-      digitalWrite(Pin1, HIGH);
-      digitalWrite(Pin2, HIGH);
-      digitalWrite(Pin3, LOW);
+      digitalWrite(pin[0], LOW);
+      digitalWrite(pin[1], HIGH);
+      digitalWrite(pin[2], HIGH);
+      digitalWrite(pin[3], LOW);
       break;
     case 4:
-      digitalWrite(Pin0, LOW);
-      digitalWrite(Pin1, HIGH);
-      digitalWrite(Pin2, LOW);
-      digitalWrite(Pin3, LOW);
+      digitalWrite(pin[0], LOW);
+      digitalWrite(pin[1], HIGH);
+      digitalWrite(pin[2], LOW);
+      digitalWrite(pin[3], LOW);
       break;
     case 5:
-      digitalWrite(Pin0, HIGH);
-      digitalWrite(Pin1, HIGH);
-      digitalWrite(Pin2, LOW);
-      digitalWrite(Pin3, LOW);
+      digitalWrite(pin[0], HIGH);
+      digitalWrite(pin[1], HIGH);
+      digitalWrite(pin[2], LOW);
+      digitalWrite(pin[3], LOW);
       break;
     case 6:
-      digitalWrite(Pin0, HIGH);
-      digitalWrite(Pin1, LOW);
-      digitalWrite(Pin2, LOW);
-      digitalWrite(Pin3, LOW);
+      digitalWrite(pin[0], HIGH);
+      digitalWrite(pin[1], LOW);
+      digitalWrite(pin[2], LOW);
+      digitalWrite(pin[3], LOW);
       break;
     case 7:
-      digitalWrite(Pin0, HIGH);
-      digitalWrite(Pin1, LOW);
-      digitalWrite(Pin2, LOW);
-      digitalWrite(Pin3, HIGH);
+      digitalWrite(pin[0], HIGH);
+      digitalWrite(pin[1], LOW);
+      digitalWrite(pin[2], LOW);
+      digitalWrite(pin[3], HIGH);
       break;
     default:
-      digitalWrite(Pin0, HIGH);
-      digitalWrite(Pin1, LOW);
-      digitalWrite(Pin2, LOW);
-      digitalWrite(Pin3, LOW);
+      digitalWrite(pin[0], HIGH);
+      digitalWrite(pin[1], LOW);
+      digitalWrite(pin[2], LOW);
+      digitalWrite(pin[3], LOW);
       break;
   }
 }
