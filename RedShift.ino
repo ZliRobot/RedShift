@@ -30,9 +30,7 @@ void move_with_speed();
 void go_to_position();
 void track(); 
 void (*move_now)() = &track;
-
-// Import init functions
-#include "rs_init.h"
+void set_position(int, int, int, int, int);
 
 void setup()
 {  
@@ -169,10 +167,69 @@ void move_with_speed() {
     if (azimuth_step == -1){azimuth_step = 7;}
     last_y_step_time = current_time;
   }
-  SET_POSITION(16,5,4,0, elevation_step);
-  SET_POSITION(14,12,13,15, azimuth_step);
+  set_position(16,5,4,0, elevation_step);
+  set_position(14,12,13,15, azimuth_step);
 }
 
 void go_to_position() {}
 
 void track(){}
+
+void set_position(int Pin0, int Pin1, int Pin2, int Pin3, int Position){
+  switch(Position){
+    case 0:
+      digitalWrite(Pin0, LOW);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin3, HIGH);
+      break;
+    case 1:
+      digitalWrite(Pin0, LOW);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin2, HIGH); 
+      digitalWrite(Pin3, HIGH);
+      break;
+    case 2:
+      digitalWrite(Pin0, LOW);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin2, HIGH);
+      digitalWrite(Pin3, LOW);
+      break;
+    case 3:
+      digitalWrite(Pin0, LOW);
+      digitalWrite(Pin1, HIGH);
+      digitalWrite(Pin2, HIGH);
+      digitalWrite(Pin3, LOW);
+      break;
+    case 4:
+      digitalWrite(Pin0, LOW);
+      digitalWrite(Pin1, HIGH);
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin3, LOW);
+      break;
+    case 5:
+      digitalWrite(Pin0, HIGH);
+      digitalWrite(Pin1, HIGH);
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin3, LOW);
+      break;
+    case 6:
+      digitalWrite(Pin0, HIGH);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin3, LOW);
+      break;
+    case 7:
+      digitalWrite(Pin0, HIGH);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin3, HIGH);
+      break;
+    default:
+      digitalWrite(Pin0, HIGH);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin3, LOW);
+      break;
+  }
+}
