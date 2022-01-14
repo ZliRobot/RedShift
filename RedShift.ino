@@ -26,13 +26,13 @@ AsyncWebSocket ws("/ws");
 String message = "";
 
 // Motor control function handler
-void move_with_speed();
-void go_to_position();
+void moveWithSpeed();
+void goToPosition();
 void track(); 
 void (*move_now)() = &track;
 
 void handleCommand(String);
-void set_position(int*, int);
+void setPosition(int*, int);
 
 void setup()
 {  
