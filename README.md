@@ -20,6 +20,8 @@ Example for wiring when using NodeMcu and ULN2003 stepper motor drivers is given
 
 ## Roadmap
 
+Project is accepting contributions!
+
 Since RedShift is a project in progress, following features are planned for implementation:
  - Manual movement: have a simple web interface that can be used as a joystick to controll movement **<- Currently here**   
  - Tracking: after telesope is moved to the desired position, it continues to move to compensate for Earth rotation   
