@@ -2,7 +2,7 @@
 
 Telescope movement controll firmware for amateur telescope makers
 
-RedShift is a program made for ESP8266 connected to two stepper motors that controll telescope azimuth and elevation. It hosts web server with a web app that allows to control your telescope using a web browser.
+RedShift is a program made for ESP8266 connected to two stepper motors that controll telescope azimuth and altitude. It hosts web server with a web app that allows to control your telescope using a web browser.
 
 ## Prerequisites
 

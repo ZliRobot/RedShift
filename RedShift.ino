@@ -9,7 +9,7 @@
 const char* ssid = "WIFI_SSID";
 const char* password = "WIFI_PASSWORD";
 
-int elevation_pins[] = {16,5,4,0};
+int altitude_pins[] = {16,5,4,0};
 int azimuth_pins[] = {14,12,13,15};
 
 // Maximum number of stepper steps per second
@@ -18,7 +18,7 @@ const int maximum_frequency = 1000;
 int x,y, x_dir, y_dir, x_temp, y_temp, x_period_us, y_period_us;
 unsigned long current_time;
 unsigned long last_x_step_time, last_y_step_time;
-int elevation_step, azimuth_step;
+int altitude_step, azimuth_step;
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 
@@ -88,7 +88,7 @@ void setup()
   Serial.print("\n");
 
   for (int i = 0; i < 4; i++){
-    pinMode(elevation_pins[i], OUTPUT);
+    pinMode(altitude_pins[i], OUTPUT);
     pinMode(azimuth_pins[i], OUTPUT);
   }
 }
@@ -150,9 +150,9 @@ void handleCommand(String command){
 void move_with_speed() {
   current_time = micros();
   if ((x != 0) && (current_time > last_x_step_time + x_period_us)) {
-    elevation_step += x_dir;
-    if (elevation_step == 8) {elevation_step = 0;}
-    if (elevation_step == -1){elevation_step = 7;}
+    altitude_step += x_dir;
+    if (altitude_step == 8) {altitude_step = 0;}
+    if (altitude_step == -1){altitude_step = 7;}
     last_x_step_time = current_time;
   }
   if ((y != 0) && (current_time > last_y_step_time + y_period_us)) {
@@ -161,7 +161,7 @@ void move_with_speed() {
     if (azimuth_step == -1){azimuth_step = 7;}
     last_y_step_time = current_time;
   }
-  set_position(elevation_pins, elevation_step);
+  set_position(altitude_pins, altitude_step);
   set_position(azimuth_pins, azimuth_step);
 }
 
