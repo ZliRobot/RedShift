@@ -20,7 +20,7 @@ Example for wiring when using NodeMcu and ULN2003 stepper motor drivers is given
 
 ## Roadmap
 
-Project is accepting contributions!
+Project is accepting contributions, contact me at red.shift.tracker-at-gmail.com
 
 Since RedShift is a project in progress, following features are planned for implementation:
  - Manual movement: have a simple web interface that can be used as a joystick to controll movement **<- Currently here**   
