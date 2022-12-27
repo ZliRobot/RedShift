@@ -18,7 +18,7 @@ const int maximum_frequency = 1000;
 int x,y, x_dir, y_dir, x_temp, y_temp, x_period_us, y_period_us;
 unsigned long current_time;
 unsigned long last_x_step_time, last_y_step_time;
-int altitude_step, azimuth_step;
+int altitude_step_no, azimuth_step_no;
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 
@@ -58,6 +58,7 @@ void setup()
   Serial.print("Connecting to: ");
   Serial.println(ssid);
   WiFi.mode(WIFI_STA);
+  WiFi.hostname("redshift");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   { 
@@ -129,6 +130,7 @@ void handleCommand(String command){
       move_now = &move_with_speed;
     }
     // Parse xy speed
+    // Speed is converted to time between consecutive steps and the direction of steps
     x_temp = command.substring(2, command.indexOf(":")).toInt();
     y_temp = command.substring(command.indexOf(":") + 1).toInt();
     x_dir = x_temp > 0 ? 1 : -1;
@@ -149,28 +151,29 @@ void handleCommand(String command){
 
 void move_with_speed() {
   current_time = micros();
+  // Move x motor one step further if it's time
   if ((x != 0) && (current_time > last_x_step_time + x_period_us)) {
-    altitude_step += x_dir;
-    if (altitude_step == 8) {altitude_step = 0;}
-    if (altitude_step == -1){altitude_step = 7;}
+    altitude_step_no += x_dir;
+    altitude_step_no = altitude_step_no % 8;
     last_x_step_time = current_time;
+    set_pin_output(altitude_pins, altitude_step_no);
   }
+  // Move y motor one step further if it's time
   if ((y != 0) && (current_time > last_y_step_time + y_period_us)) {
-    azimuth_step += y_dir;
-    if (azimuth_step == 8) {azimuth_step = 0;}
-    if (azimuth_step == -1){azimuth_step = 7;}
+    azimuth_step_no += y_dir;
+    altitude_step_no = altitude_step_no % 8;
     last_y_step_time = current_time;
+    set_pin_output(azimuth_pins, azimuth_step_no);
   }
-  set_position(altitude_pins, altitude_step);
-  set_position(azimuth_pins, azimuth_step);
 }
 
 void go_to_position() {}
 
 void track(){}
 
-void set_position(int *pin, int Position){
-  switch(Position){
+void set_pin_output(int *pin, int StepNo){
+  // Map step number (0-8) to pin values
+  switch(StepNo){
     case 0:
       digitalWrite(pin[0], LOW);
       digitalWrite(pin[1], LOW);

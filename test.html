@@ -1,0 +1,74 @@
+<script>
+var LONGITUDE = 0.0;
+	
+function decimalhours(now) {
+  return (((now.getSeconds() / 60) + now.getUTCMinutes()) / 60) + now.getUTCHours(); 
+}
+
+function juliandate(now) {
+  var y = now.getUTCFullYear();
+  var m = now.getUTCMonth() + 1;
+  var d = now.getUTCDate();
+  if ((m == 1) || (m == 2)){
+    y = y - 1;
+    m = m + 12;
+  }
+  var A = Math.floor(y / 100);
+  var B = 2 - A + Math.floor(A / 4);
+  var C = Math.floor(365.25 * y);
+  var D = Math.floor(30.6001 * (m + 1));
+  return (B + C + D + d + 1720994.5);
+}
+
+function gst(jd, dechours) {
+  console.log("JD: " + jd);
+  var S = jd - 2451545;
+  var T = S / 36525;
+  var T0 = 6.697374558 + (2400.051336 * T) + (0.000025862 * Math.pow(T, 2));
+  if (Math.sign(T0) == -1){
+    T0 = (T0 + (24 * Math.abs(Math.floor(T0 / 24))));
+  } else {
+    T0 = (T0 - (24 * Math.abs(Math.floor(T0 / 24)))); 
+  }
+  T0 = T0 + (dechours * 1.002737909);
+  if (T0 < 0) {T0 = T0 + 24};
+  if (T0 > 24) {T0 = T0 - 24};
+  var h = Math.floor(T0);
+  var m1 = T0 - h;
+  var m = Math.floor((T0 - h) * 60);
+  var s = Math.floor((((T0 - h) * 60) - m) *  60);
+  console.log("T0: " + T0);
+  return T0;
+}
+
+function lst(gstime) {
+  var lstime;
+  var utcdiff = LONGITUDE / 15;
+  lstime = gstime + utcdiff;
+
+  lstime = (lstime + 24) % 24;
+
+  return lstime;
+}
+
+function setPosition(position) {
+
+	// njiov algoritam
+	LONGITUDE = position.coords.longitude;
+	var now = new Date();
+    nowjd = juliandate(now);
+    nowdechours = decimalhours(now);
+	var lst1 = lst(gst(nowjd, nowdechours))
+    console.log(lst1);
+	
+	// moj algoritam
+	var now_ms = now.getTime();
+	var j2000 = Date.parse("Jan 1, 2000, 12:00");
+	var sidereal_days = (now_ms - j2000) / 8.616409E+7;
+	var sidereal_time = ((sidereal_days % 1) * 24 + LONGITUDE / 15 - 6.30677 + 24) % 24;
+	console.log(sidereal_time);
+	
+	console.log(lst1 - sidereal_time);
+}
+  navigator.geolocation.getCurrentPosition(setPosition);
+</script>
