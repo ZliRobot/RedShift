@@ -10,9 +10,6 @@
     <!-- Disable tap highlight on IE -->
     <meta name="msapplication-tap-highlight" content="no">
 
-    <!-- Web Application Manifest -->
-    <link rel="manifest" href="/manifest.json">
-
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Red Shift">
@@ -132,8 +129,16 @@ font-size: xx-large;" onmousedown="return false" onselectstart="return false" on
         let paint = false;
 
         function getPosition(event) {
-            var mouse_x = event.clientX || event.touches[0].clientX;
-            var mouse_y = event.clientY || event.touches[0].clientY;
+            var mouse_x = 0;
+            var mouse_y = 0;
+
+            if (event && event.touches) {
+                mouse_x = event.touches[0].clientX;
+                mouse_y = event.touches[0].clientY;
+            } else {
+                mouse_x = event.clientX;
+                mouse_y = event.clientY;
+            }
             coord.x = mouse_x - canvas.offsetLeft;
             coord.y = mouse_y - canvas.offsetTop;
         }
@@ -153,7 +158,7 @@ font-size: xx-large;" onmousedown="return false" onselectstart="return false" on
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             background();
             joystick(coord.x, coord.y);
-            Draw();
+            Draw(event);
         }
 
 
@@ -207,10 +212,6 @@ font-size: xx-large;" onmousedown="return false" onselectstart="return false" on
             }
         } 
     </script>
-	<script src="https://code.getmdl.io/1.2.1/material.min.js"></script>
-    <!-- build:js scripts/main.min.js -->
-    <script src="main.js"></script>
-    <!-- endbuild -->
 
 </body>
 </html><br>
