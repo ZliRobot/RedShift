@@ -11,6 +11,9 @@ const char* password = "WIFI_PASSWORD";
 
 int altitude_pins[] = {16,5,4,0};
 int azimuth_pins[] = {14,12,13,15};
+int laser_pin = 2;
+
+bool is_laser_on = false;
 
 // Maximum number of stepper steps per second
 const int maximum_frequency = 1000;
@@ -38,7 +41,10 @@ void handleCommand(String);
 void setPosition(int*, int);
 
 void setup()
-{  
+{ 
+  pinMode(laser_pin, OUTPUT);
+  digitalWrite(laser_pin, LOW);
+   
   Serial.begin(115200);
 
   // Initialize filesystem.
@@ -113,8 +119,6 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       message = message.substring(0, len);
       Serial.println(message);
       handleCommand(message);
-      Serial.println(x);
-      Serial.println(y);
       break;
     case WS_EVT_PONG:
     case WS_EVT_ERROR:
@@ -144,6 +148,14 @@ void handleCommand(String command){
       if (x > 0) {x_period_us = (100 / x) * (1000000 / maximum_frequency);}
       if (y > 0) {y_period_us = (100 / y) * (1000000 / maximum_frequency);}
     }
+  } else if (command.substring(0,2).equals("ll")) {
+    is_laser_on = !is_laser_on;
+    if (is_laser_on) {
+      digitalWrite(laser_pin, HIGH);
+    } else {
+      digitalWrite(laser_pin, LOW);
+    }
+    
   } else {
     move_now = &track;
   }
