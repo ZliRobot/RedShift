@@ -11,7 +11,7 @@ const char* password = "WIFI_PASSWORD";
 
 int altitude_pins[] = {16,5,4,0};
 int azimuth_pins[] = {14,12,13,15};
-int laser_pin = 2;
+int laser_pin = 9;
 
 bool is_laser_on = false;
 
@@ -166,14 +166,14 @@ void move_with_speed() {
   // Move x motor one step further if it's time
   if ((x != 0) && (current_time > last_x_step_time + x_period_us)) {
     altitude_step_no += x_dir;
-    altitude_step_no = altitude_step_no % 8;
+    altitude_step_no = (altitude_step_no + 8) % 8;
     last_x_step_time = current_time;
     set_pin_output(altitude_pins, altitude_step_no);
   }
   // Move y motor one step further if it's time
   if ((y != 0) && (current_time > last_y_step_time + y_period_us)) {
     azimuth_step_no += y_dir;
-    altitude_step_no = altitude_step_no % 8;
+    azimuth_step_no = (azimuth_step_no + 8) % 8;
     last_y_step_time = current_time;
     set_pin_output(azimuth_pins, azimuth_step_no);
   }
